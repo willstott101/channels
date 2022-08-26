@@ -35,7 +35,7 @@ a single idea of what a channels "application" is, and even the simplest of
     ASGI is the name for the asynchronous server specification that Channels
     is built on. Like WSGI, it is designed to let you choose between different
     servers and frameworks rather than being locked into Channels and our server
-    Daphne. You can learn more at http://asgi.readthedocs.io
+    Daphne. You can learn more at https://asgi.readthedocs.io
 
 Channels gives you the tools to write these basic *consumers* - individual
 pieces that might handle chat messaging, or notifications - and tie them
@@ -43,9 +43,9 @@ together with URL routing, protocol detection and other handy things to
 make a full application.
 
 We treat HTTP and the existing Django application as part of a bigger whole.
-Traditional Django views are still there with Channels and still useable - with
-Django's native ASGI support, or a Channels provided version for Django 2.2 -
-but you can now also write custom HTTP long-polling handling, or WebSocket
+Traditional Django views are still there with Channels and still usable - with
+Django's native ASGI support but you can also write custom HTTP
+long-polling handling, or WebSocket
 receivers, and have that code sit alongside your existing code. URL routing,
 middleware - they are all just ASGI applications.
 
@@ -62,7 +62,7 @@ and a series of *events*.
 
 The *scope* is a set of details about a single incoming connection - such as
 the path a web request was made from, or the originating IP address of a
-WebSocket, or the user messaging a chatbot - and persists throughout the
+WebSocket, or the user messaging a chatbot. The scope persists throughout the
 connection.
 
 For HTTP, the scope just lasts a single request. For WebSockets, it lasts for
@@ -76,7 +76,7 @@ During the lifetime of this *scope*, a series of *events* occur. These
 represent user interactions - making a HTTP request, for example, or
 sending a WebSocket frame. Your Channels or ASGI applications will be
 **instantiated once per scope**, and then be fed the stream of *events*
-happening within that scope to decide what to do with.
+happening within that scope to decide what action to take.
 
 An example with HTTP:
 
@@ -191,8 +191,8 @@ into one bigger app that represents your project using routing:
 .. code-block:: python
 
     application = URLRouter([
-        url(r"^chat/admin/$", AdminChatConsumer.as_asgi()),
-        url(r"^chat/$", PublicChatConsumer.as_asgi(),
+        path("chat/admin/", AdminChatConsumer.as_asgi()),
+        path("chat/", PublicChatConsumer.as_asgi(),
     ])
 
 Channels is not just built around the world of HTTP and WebSockets - it also
@@ -221,8 +221,8 @@ WebSockets and chat requests:
     application = ProtocolTypeRouter({
 
         "websocket": URLRouter([
-            url(r"^chat/admin/$", AdminChatConsumer.as_asgi()),
-            url(r"^chat/$", PublicChatConsumer.as_asgi()),
+            path("chat/admin/", AdminChatConsumer.as_asgi()),
+            path("chat/", PublicChatConsumer.as_asgi()),
         ]),
 
         "telegram": ChattyBotConsumer.as_asgi(),
@@ -263,7 +263,17 @@ point-to-point and broadcast messaging.
     Channel layers are an optional part of Channels, and can be disabled if you
     want (by setting the ``CHANNEL_LAYERS`` setting to an empty value).
 
-(insert cross-process example here)
+.. code-block:: python
+
+    #In a consumer
+    self.channel_layer.send(
+        'event', 
+        {
+            'type': 'message',
+            'channel': channel,
+            'text': text,
+        }
+    )
 
 You can also send messages to a dedicated process that's listening on its own,
 fixed channel name:
@@ -291,8 +301,8 @@ WebSocket views by just adding the right middleware around them:
 
 .. code-block:: python
 
-    from django.urls import re_path
     from django.core.asgi import get_asgi_application
+    from django.urls import re_path
 
     # Initialize Django ASGI application early to ensure the AppRegistry
     # is populated before importing code that may import ORM models.
@@ -300,13 +310,16 @@ WebSocket views by just adding the right middleware around them:
 
     from channels.routing import ProtocolTypeRouter, URLRouter
     from channels.auth import AuthMiddlewareStack
+    from channels.security.websocket import AllowedHostsOriginValidator
 
     application = ProtocolTypeRouter({
         "http": django_asgi_app,
-        "websocket": AuthMiddlewareStack(
-            URLRouter([
-                re_path(r"^front(end)/$", consumers.AsyncChatConsumer.as_asgi()),
-            ])
+        "websocket": AllowedHostsOriginValidator(
+            AuthMiddlewareStack(
+                URLRouter([
+                    re_path(r"^front(end)/$", consumers.AsyncChatConsumer.as_asgi()),
+                ])
+            )
         ),
     })
 

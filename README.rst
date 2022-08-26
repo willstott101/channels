@@ -23,7 +23,7 @@ https://channels.readthedocs.io
 
 Channels is an official Django Project and as such has a deprecation policy.
 Details about what's deprecated or pending deprecation for each release is in
-the `release notes <http://channels.readthedocs.io/en/latest/releases/index.html>`_.
+the `release notes <https://channels.readthedocs.io/en/latest/releases/index.html>`_.
 
 Support can be obtained through several locations - see our
 `support docs <https://channels.readthedocs.io/en/latest/support.html>`_ for more.
@@ -35,8 +35,8 @@ and `tutorial <https://channels.readthedocs.io/en/latest/tutorial/index.html>`_ 
 Dependencies
 ------------
 
-All Channels projects currently support Python 3.6 and up. ``channels`` is
-compatible with Django 2.2, 3.2, and 4.0.
+All Channels projects currently support Python 3.7 and up. ``channels`` is
+compatible with Django 2.2, 3.2, 4.0 and 4.1.
 
 
 Contributing

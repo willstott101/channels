@@ -1,6 +1,66 @@
 Full release notes, with more details and upgrade information, are available at:
 https://channels.readthedocs.io/en/latest/releases
 
+4.0.0b1 (2022-08-25)
+--------------------
+
+This is a beta release to enable testing of the new Channels, Daphne, and
+channels-redis packages.
+
+TODO: These notes will move to the docs for the release with a short summary and link here.
+
+* Drops support for Python 3.6.
+* Minimum Django version is now Django 3.2.
+* Added compatibility with Django 4.1.
+
+Serving of Django HTTPS applications (whether using sync or async views) under ASGI is now Django's responsibilty.
+
+    TODO: A pass through the docs to update everything is pending.
+
+* Removed deprecated static files handling in favor of ``django.contrib.staticfiles``.
+* Removed deprecated automatic routing of ``http`` protocol handler in ProtocolTypeRouter.
+  You must explicitly register the ``http`` handler in your application.
+* Removed the deprecated AsgiHandler, which wrapped Django views, in favour of Django's own ASGI support. You should use
+  Django's ``get_asgi_application`` to provide the ``http`` handler for ProtocolTypeRouter, or an appropriate path for
+  URLRouter, in order to route your Django application.
+* The supporting ``AsgiRequest`` is also removed, as it was only used for ``AsgiHandler``.
+
+  TODO: Repeat the basic asgi.py (née routing.py) example here, which is the minimum folks using the old automatic http
+        handler routing would need to update.
+
+* The use of the ``guarantee_single_callable()`` compatibility shim is removed. All applications must be ASGI v3 single
+  callables.
+
+* The ``runserver`` management command is moved to the Daphne project, in order to allow users of other ASGI servers to
+  use Channels without the overhead of Daphne and Twisted.
+
+  In order to the ``runserver`` command, add ``daphne`` to your ``INSTALLED_APPS``, before ``django.contrib.staticfiles``.
+
+    INSTALLED_APPS = [
+        'daphne',
+        ...
+    ]
+
+  Note the ``runworker`` command remains a part of the ``channels`` app.
+
+* Daphne is now an optional dependency. Use:
+
+        pip install 'channels[daphne]'
+
+  … to install.
+
+* Removed the ``consumer_started`` and consumer_finished`` signals, unused since the 2.0 rewrite.
+
+
+3.0.5 (2022-06-24)
+------------------
+
+Channels 3.0.5 is a bugfix release in the 3.0 series.
+
+Please see the `Version 3.0.5 release notes
+<https://channels.readthedocs.io/en/latest/releases/3.0.5.html>`_ for full
+details.
+
 
 3.0.4 (2021-07-11)
 ------------------
